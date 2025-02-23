@@ -28,12 +28,13 @@ type ConfigST struct {
 
 // ServerST struct
 type ServerST struct {
-	HTTPPort      string   `json:"http_port"`
-	ICEServers    []string `json:"ice_servers"`
-	ICEUsername   string   `json:"ice_username"`
-	ICECredential string   `json:"ice_credential"`
-	WebRTCPortMin uint16   `json:"webrtc_port_min"`
-	WebRTCPortMax uint16   `json:"webrtc_port_max"`
+	HTTPPort           string   `json:"http_port"`
+	ICEServers         []string `json:"ice_servers"`
+	ICEUsername        string   `json:"ice_username"`
+	ICECredential      string   `json:"ice_credential"`
+	WebRTCPortMin      uint16   `json:"webrtc_port_min"`
+	WebRTCPortMax      uint16   `json:"webrtc_port_max"`
+	CrossOriginDomains []string `json:"cross_origin_domains"`
 }
 
 // StreamST struct
@@ -114,6 +115,12 @@ func (element *ConfigST) GetWebRTCPortMax() uint16 {
 	return element.Server.WebRTCPortMax
 }
 
+func (element *ConfigST) GetCrossOriginDomains() []string {
+	element.mutex.Lock()
+	defer element.mutex.Unlock()
+	return element.Server.CrossOriginDomains
+}
+
 func loadConfig() *ConfigST {
 	var tmp ConfigST
 	data, err := ioutil.ReadFile("config.json")
@@ -131,6 +138,7 @@ func loadConfig() *ConfigST {
 		udpMin := flag.Int("udp_min", 0, "WebRTC UDP port min")
 		udpMax := flag.Int("udp_max", 0, "WebRTC UDP port max")
 		iceServer := flag.String("ice_server", "", "ICE Server")
+		crossOriginDomains := flag.String("cross_origin_domains", "", "Cross Origin Domains")
 		flag.Parse()
 
 		tmp.Server.HTTPPort = *addr
@@ -138,6 +146,9 @@ func loadConfig() *ConfigST {
 		tmp.Server.WebRTCPortMax = uint16(*udpMax)
 		if len(*iceServer) > 0 {
 			tmp.Server.ICEServers = []string{*iceServer}
+		}
+		if len(*crossOriginDomains) > 0 {
+			tmp.Server.CrossOriginDomains = []string{*crossOriginDomains}
 		}
 
 		tmp.Streams = make(map[string]StreamST)
