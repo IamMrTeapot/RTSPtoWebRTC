@@ -157,6 +157,15 @@ func HTTPAPIServerStreamWebRTC(c *gin.Context) {
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
+		origin := c.Request.Header.Get("Origin")
+		if origin != "" {
+			for _, domain := range Config.GetCrossOriginDomains() {
+				if domain == origin {
+					c.Header("Access-Control-Allow-Origin", origin)
+					break
+				}
+			}
+		}
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-access-token")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type")
